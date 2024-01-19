@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import telran.probes.dto.*; 
 import telran.probes.service.SensorRangeProviderService;
 
-@SpringBootApplication
+@SpringBootApplication	
 @RequiredArgsConstructor
 @Slf4j
 public class AnalyzerAppl {
