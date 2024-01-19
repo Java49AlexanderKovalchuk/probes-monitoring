@@ -35,8 +35,9 @@ public class AvgReducerAppl {
 		Long avgValue = avgReducer.getAvgValue(probeData);
 		if (avgValue != null) {
 			log.trace("average value: {}", avgValue);
-			streamBreadge.send(avgValueBindingName, avgValue);
-			log.trace("average value {} sent to {}", avgValue, avgValueBindingName);
+			ProbeData avgData = new ProbeData(probeData.sensorId(), avgValue, System.currentTimeMillis());
+			streamBreadge.send(avgValueBindingName, avgData);
+			log.trace("average data {} sent to {}", avgData, avgValueBindingName);
 		}
 		
 	}
