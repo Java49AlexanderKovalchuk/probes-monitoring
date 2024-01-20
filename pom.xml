@@ -55,6 +55,12 @@
 			<artifactId>probes-api</artifactId>
 			<version>0.0.1</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+		
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -88,5 +94,6 @@
 	<modules>
 		<module>analyzer</module>
 		<module>avg-reducer</module>
+		<module>avg-populator</module>
 	</modules>
 </project>
