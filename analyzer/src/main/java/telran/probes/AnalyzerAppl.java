@@ -47,6 +47,7 @@ public class AnalyzerAppl {
 			log.debug("deviation: {}", deviation);
 			ProbeDataDeviation dataDeviation = 
 					new ProbeDataDeviation(sensorId, value, deviation, System.currentTimeMillis());
+			System.out.println("test test test");
 			streamBridge.send(deviationBindingName, dataDeviation); 
 			log.debug("deviation data {} sent to {}", dataDeviation, deviationBindingName); 
 		}

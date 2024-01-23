@@ -51,6 +51,7 @@ class AvgReducerControllerTest {
 		producer.send(new GenericMessage<ProbeData>(PROBE_DATA), bindingNameConsumer);
 		Message<byte[]> message = consumer.receive(10, bindingNameProducer);
 		assertNotNull(message);
+		System.out.println("control control control");
 		ProbeData actualAvg = mapper.readValue(message.getPayload(), ProbeData.class);
 		assertEquals(AVG_DATA, actualAvg);
 	}
