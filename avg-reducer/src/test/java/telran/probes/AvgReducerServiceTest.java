@@ -14,29 +14,31 @@ import telran.probes.repo.ProbesListRepo;
 import telran.probes.service.AvgValueService;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 import static org.mockito.Mockito.when;
 
 import java.util.*;
 
 @SpringBootTest
 public class AvgReducerServiceTest {
-	static List<Float> VALUES_NO_AVG;
-	static List<Float> VALUES_AVG;
-	static final long SENSOR_ID_NO_REDIS_RECORD = 123l;
-	static final long SENSOR_ID_NO_AVG = 124l;
-	static final long SENSOR_ID_AVG = 125l;
-	static final float VALUE = 100f;
-	static final ProbeData PROBE_NO_REDIS_RECORD = new ProbeData(SENSOR_ID_NO_REDIS_RECORD, VALUE, 0);
-	static final ProbeData PROBE_NO_AVG = new ProbeData(SENSOR_ID_NO_AVG, VALUE, 0);
-	static final ProbeData PROBE_AVG = new ProbeData(SENSOR_ID_AVG, VALUE, 0);
-	static final ProbesList PROBES_LIST_NO_AVG = new ProbesList(SENSOR_ID_NO_AVG);
-	static final ProbesList PROBES_LIST_AVG = new ProbesList(SENSOR_ID_AVG);
-	static final ProbesList PROBES_LIST_NO_RECORD = new ProbesList(SENSOR_ID_NO_REDIS_RECORD);
-	static final Map<Long, ProbesList> mapRedis = new HashMap<>();
+	List<Float> VALUES_NO_AVG;
+	List<Float> VALUES_AVG;
+	final long SENSOR_ID_NO_REDIS_RECORD = 123l;
+	final long SENSOR_ID_NO_AVG = 124l;
+	final long SENSOR_ID_AVG = 125l;
+	final float VALUE = 100f;
+	final ProbeData PROBE_NO_REDIS_RECORD = new ProbeData(SENSOR_ID_NO_REDIS_RECORD, VALUE, 0);
+	final ProbeData PROBE_NO_AVG = new ProbeData(SENSOR_ID_NO_AVG, VALUE, 0);
+	final ProbeData PROBE_AVG = new ProbeData(SENSOR_ID_AVG, VALUE, 0);
+	final ProbesList PROBES_LIST_NO_AVG = new ProbesList(SENSOR_ID_NO_AVG);
+	final ProbesList PROBES_LIST_AVG = new ProbesList(SENSOR_ID_AVG);
+	final ProbesList PROBES_LIST_NO_RECORD = new ProbesList(SENSOR_ID_NO_REDIS_RECORD);
+	final Map<Long, ProbesList> mapRedis = new HashMap<>();
 	@Autowired
-	AvgValueService avgValueService;	
+	AvgValueService avgValueService;
 	@MockBean
 	ProbesListRepo probesListRepo;
+
 	@BeforeEach
 	void setUp() {
 		VALUES_NO_AVG = PROBES_LIST_NO_AVG.getValues();
@@ -45,6 +47,7 @@ public class AvgReducerServiceTest {
 		mapRedis.put(SENSOR_ID_NO_AVG, PROBES_LIST_NO_AVG);
 		mapRedis.put(SENSOR_ID_AVG, PROBES_LIST_AVG);
 	}
+
 	@Test
 	void testNoRedisRecord() {
 		when(probesListRepo.findById(SENSOR_ID_NO_REDIS_RECORD)).thenReturn(Optional.ofNullable(null));
@@ -82,10 +85,10 @@ public class AvgReducerServiceTest {
 		assertEquals(VALUES_NO_AVG, probesList.getValues());
 		System.out.println("values no avg: " + VALUES_NO_AVG);
 	}
-	
+
 	@Test
 	void testAvgValue() {
-		when(probesListRepo.findById(SENSOR_ID_AVG)).thenReturn(Optional.ofNullable(PROBES_LIST_AVG));
+		when(probesListRepo.findById(SENSOR_ID_AVG)).thenReturn(Optional.of(PROBES_LIST_AVG));
 		when(probesListRepo.save(PROBES_LIST_AVG)).thenAnswer(new Answer<ProbesList>() {
 
 			@Override

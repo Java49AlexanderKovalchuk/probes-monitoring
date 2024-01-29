@@ -1,36 +1,25 @@
 package telran.probes.model;
 
-import java.time.LocalDateTime;
+import java.time.*;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+import telran.probes.dto.ProbeData;
 
-@Document(collection = "probe_values")
-@AllArgsConstructor
-
+@Document
+@ToString
 @Getter
+@NoArgsConstructor
 public class ProbeDataDoc {
-
-	@Id
-	Long sensorId;
+	long sensorID;
 	LocalDateTime timestamp;
 	Float value;
 
-//	public ProbeDataDoc of(ProbeData probeData) {
-//		return new ProbeDataDoc(probeData.sensorId(),
-//				//LocalDateTime.ofInstant(Instant.ofEpochMilli(probeData.timestamp()), TimeZone.getDefault().toZoneId()),
-//				Instant.ofEpochMilli(probeData.timestamp()).atZone(ZoneId.systemDefault()).toLocalDateTime(),
-//				probeData.value());
-//	}
-
-//	private ProbeDataDoc(Long sensorId, LocalDateTime timestamp, Float value) {
-//		this.sensorId = sensorId;
-//		this.timestamp = timestamp;
-//		this.value = value;
-//	}
+	public ProbeDataDoc(ProbeData probeData) {
+		sensorID = probeData.sensorId();
+		Instant instant = Instant.ofEpochMilli(probeData.timestamp());
+		timestamp = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+		value = probeData.value();
+	}
 }

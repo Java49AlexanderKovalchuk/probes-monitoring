@@ -1,46 +1,33 @@
 package telran.probes;
 
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.function.Consumer;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import telran.probes.dto.ProbeData;
-import telran.probes.repo.AvgPopulatorRepo;
-import telran.probes.model.*;
-
-@SpringBootApplication	
+import telran.probes.model.ProbeDataDoc;
+import telran.probes.repo.ProbeDataRepo;
 @Slf4j
+@SpringBootApplication
+@RequiredArgsConstructor
 public class AvgPopulatorAppl {
-	@Autowired
-	AvgPopulatorRepo avgRepo;
-	
+final ProbeDataRepo probeDataRepo;
 	public static void main(String[] args) {
 		SpringApplication.run(AvgPopulatorAppl.class, args);
 
 	}
-	
 	@Bean
-	public Consumer<ProbeData> consumerProbeData() {
-		return this::consumeMethod;
+	Consumer<ProbeData> avgPopulatorConsumer() {
+		return this::probeDataPopulation;
 	}
-	void consumeMethod(ProbeData probeData) {
-		log.debug("received probe: {}", probeData);
-	    ProbeDataDoc dataDoc = new ProbeDataDoc(probeData.sensorId(), 
-	    		Instant.ofEpochMilli(probeData.timestamp())
-	    			.atZone(ZoneId.systemDefault()).toLocalDateTime(), 
-	    			probeData.value());
-		
-		log.trace("data saving: {}", dataDoc );
-		avgRepo.save(dataDoc);
-		
+	void probeDataPopulation(ProbeData probeData) {
+		log.debug("received probeData: {}", probeData);
+		ProbeDataDoc probeDataDoc = probeDataRepo.save(new ProbeDataDoc(probeData));
+		log.debug("Document {} has been saved to Database", probeDataDoc);
 	}
 
 }
