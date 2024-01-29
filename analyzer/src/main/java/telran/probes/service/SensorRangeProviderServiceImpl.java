@@ -39,6 +39,7 @@ public class SensorRangeProviderServiceImpl implements SensorRangeProviderServic
 		return this::checkConfigurationUpdate;
 	}
 	void checkConfigurationUpdate(String message) {
+		
 		String [] tokens = message.split(delimiter);
 		if(tokens[0].equals(rangeUpdateToken)) {
 			updateMapRanges(tokens[1]);
@@ -54,9 +55,12 @@ public class SensorRangeProviderServiceImpl implements SensorRangeProviderServic
 	private SensorRange getRangeFromService(long id) {
 		SensorRange res =null;
 		try {
-			ResponseEntity<SensorRange> responseEntity = 
+			ResponseEntity<?> responseEntity = 
 			restTemplate.exchange(getFullUrl(id), HttpMethod.GET, null, SensorRange.class);
-			res = responseEntity.getBody();
+			if(!responseEntity.getStatusCode().is2xxSuccessful()) {
+				throw new Exception((String) responseEntity.getBody());
+			}
+			res = (SensorRange)responseEntity.getBody();
 			mapRanges.put(id, res);
 		} catch (Exception e) {
 			log.error("no sensor range provided for sensor {}, reason: {}",
