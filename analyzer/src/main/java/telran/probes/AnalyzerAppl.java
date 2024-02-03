@@ -10,18 +10,17 @@ import org.springframework.context.annotation.Bean;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import telran.probes.dto.*; 
+import telran.probes.dto.*;
 import telran.probes.service.SensorRangeProviderService;
 
-@SpringBootApplication	
+@SpringBootApplication
 @RequiredArgsConstructor
 @Slf4j
 public class AnalyzerAppl {
-	
-	final SensorRangeProviderService providerService;
-	final StreamBridge streamBridge;
-	@Value("${app.deviation.bindingName:deviation-out-0}")
-	String deviationBindingName;
+final SensorRangeProviderService providerService;
+final StreamBridge streamBridge;
+@Value("${app.deviation.binding.name:deviation-out-0}")
+String deviationBindingName;
 	public static void main(String[] args) {
 		SpringApplication.run(AnalyzerAppl.class, args);
 
@@ -35,21 +34,23 @@ public class AnalyzerAppl {
 		long sensorId = probeData.sensorId();
 		SensorRange range = providerService.getSensorRange(sensorId);
 		float value = probeData.value();
-		float border = 0;
-		if(value < range.minValue()) {
+		
+		float border = Float.MIN_VALUE;
+		if (value < range.minValue()) {
 			border = range.minValue();
+		} else if(value > range.maxValue()) {
+			border = range.maxValue();
 		}
-		else if(value > range.maxValue()) {
-			border = range.maxValue();  
-		}
-		if(border != 0) {
+		if (border != Float.MIN_VALUE) {
 			float deviation = value - border;
 			log.debug("deviation: {}", deviation);
-			ProbeDataDeviation dataDeviation = 
+			ProbeDataDeviation dataDeviation =
 					new ProbeDataDeviation(sensorId, value, deviation, System.currentTimeMillis());
-			streamBridge.send(deviationBindingName, dataDeviation); 
-			log.debug("deviation data {} sent to {}", dataDeviation, deviationBindingName); 
+			streamBridge.send(deviationBindingName, dataDeviation);
+			log.debug("deviation data {} sent to {}", dataDeviation, deviationBindingName);
+			
 		}
 	}
+	
 
 }
