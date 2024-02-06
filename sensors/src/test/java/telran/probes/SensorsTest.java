@@ -15,29 +15,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import telran.probes.configuration.SensorsConfiguration;
 import telran.probes.dto.ProbeData;
-
 @SpringBootTest
 @Slf4j
 @Import(TestChannelBinderConfiguration.class)
 class SensorsTest {
 	@Autowired
-	OutputDestination consumer;
+OutputDestination consumer;
 	@Autowired
 	SensorsConfiguration sensorsConfiguration;
-
+	
 	@Test
-	void test() throws Exception {
+	void test() throws Exception{
 		ObjectMapper mapper = new ObjectMapper();
 		String bindingName = sensorsConfiguration.getBindingName();
 		long timestamp = System.currentTimeMillis();
 		while (System.currentTimeMillis() - timestamp < SensorsAppl.TIMEOUT) {
 			Message<byte[]> message = consumer.receive(1000, bindingName);
-			if (message != null) {
-				ProbeData probeData = mapper.readValue(message.getPayload(), ProbeData.class);
+			if(message != null) {
+				ProbeData probeData = mapper.readValue( message.getPayload(),
+						ProbeData.class);
 				log.debug("test: {}", probeData);
 			}
 			Thread.sleep(1000);
-
+			
+			
 		}
 	}
 

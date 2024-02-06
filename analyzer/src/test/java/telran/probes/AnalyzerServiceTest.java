@@ -27,14 +27,13 @@ import org.springframework.web.client.RestTemplate;
 
 import telran.probes.dto.SensorRange;
 import telran.probes.service.SensorRangeProviderService;
-
 @SpringBootTest
 @Import(TestChannelBinderConfiguration.class)
 @TestMethodOrder(value = MethodOrderer.OrderAnnotation.class)
 @SuppressWarnings("unchecked")
 class AnalyzerServiceTest {
 	@Autowired
-	InputDestination producer;
+InputDestination producer;
 	String consumerBindingName = "configChangeConsumer-in-0";
 	@MockBean
 	RestTemplate restTemplate;
@@ -46,7 +45,8 @@ class AnalyzerServiceTest {
 	private static final float MAX_VALUE = 20;
 	static final SensorRange SENSOR_RANGE = new SensorRange(MIN_VALUE, MAX_VALUE);
 	private static final long SENSOR_ID_UNAVAILABLE = 125l;
-	private static final SensorRange SENSOR_RANGE_UPDATED = new SensorRange(MIN_VALUE + 10, MAX_VALUE + 10);
+	private static final SensorRange SENSOR_RANGE_UPDATED = new SensorRange(MIN_VALUE + 10,
+			MAX_VALUE + 10);
 	private static final String URL = "http://localhost:8282/sensor/range/";
 	@Value("${app.sensor.range.provider.default.min}")
 	float minDefaultValue;
@@ -56,15 +56,14 @@ class AnalyzerServiceTest {
 	String delimiter;
 	@Value("${app.update.token.range}")
 	String rangeUpdateToken;
-
 	@Test
 	@Order(1)
 	void normalFlowWithNoMapData() {
-
+		
 		mockRemoteServiceRequest(SENSOR_RANGE, HttpStatus.OK, SENSOR_ID);
 		SensorRange actual = providerService.getSensorRange(SENSOR_ID);
 		assertEquals(SENSOR_RANGE, actual);
-
+		
 	}
 	@Test
 	@Order(2)
@@ -72,7 +71,7 @@ class AnalyzerServiceTest {
 		testNoServiceCalled();
 		SensorRange actual = providerService.getSensorRange(SENSOR_ID);
 		assertEquals(SENSOR_RANGE, actual);
-
+		
 	}
 	@Test
 	@Order(3)
@@ -115,7 +114,6 @@ class AnalyzerServiceTest {
 		actual = providerService.getSensorRange(SENSOR_ID_UNAVAILABLE);
 		assertEquals(SENSOR_RANGE, actual);
 	}
-	
 	@Test
 	@Order(5)
 	void sensorInMapUpdated() {
@@ -127,7 +125,6 @@ class AnalyzerServiceTest {
 		SensorRange actual = providerService.getSensorRange(SENSOR_ID);
 		assertEquals(SENSOR_RANGE_UPDATED, actual);
 	}
-	
 	@Test
 	@Order(6)
 	void sensorNotInMapUpdated() {
@@ -138,18 +135,33 @@ class AnalyzerServiceTest {
 				rangeUpdateToken, delimiter, 100000)), consumerBindingName);
 		
 	}
-	private void mockRemoteServiceRequest(SensorRange sensorRange, HttpStatus status, long sensorId) {
-		ResponseEntity<SensorRange> responseEntity = new ResponseEntity<SensorRange>(sensorRange, status);
-		when(restTemplate.exchange(URL + sensorId, HttpMethod.GET, null, SensorRange.class)).thenReturn(responseEntity);
+	@Test
+	@Order(7)
+	void emailUpdate() {
+		//test case: In the case no sensor has been updated 
+		//there must not be remote service call 
+		testNoServiceCalled();
+		producer.send(new GenericMessage<String>(String.format("%s%s%d",
+				"email", delimiter, SENSOR_ID)), consumerBindingName);
+		
 	}
-
+	private void mockRemoteServiceRequest(SensorRange sensorRange, HttpStatus status, 
+			long sensorId) {
+		ResponseEntity<SensorRange> responseEntity =
+				new ResponseEntity<SensorRange>(sensorRange, status);
+		when(restTemplate.exchange(URL + sensorId,
+				HttpMethod.GET, null,
+				SensorRange.class)).thenReturn(responseEntity);
+	}
+	
+	
 	private void testNoServiceCalled() {
 		when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(),
-			any(Class.class))).thenAnswer(new Answer<ResponseEntity<?>>() {
-				@Override
-				public ResponseEntity<?> answer(InvocationOnMock invocation) throws Throwable {
-					fail("service shouldn't be called");
-					return null;
+				any(Class.class))).thenAnswer(new Answer<ResponseEntity<?>>() {
+					@Override
+					public ResponseEntity<?> answer(InvocationOnMock invocation) throws Throwable {
+						fail("service shouldn't be called");
+						return null;
 					}
 				});
 	}
