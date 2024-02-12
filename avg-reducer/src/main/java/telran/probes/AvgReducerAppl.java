@@ -2,6 +2,7 @@ package telran.probes;
 
 import java.util.function.Consumer;
 
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,37 +11,37 @@ import org.springframework.context.annotation.Bean;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import telran.probes.dto.ProbeData;
+import telran.probes.dto.*;
 import telran.probes.service.AvgValueService;
 
 @SpringBootApplication
 @RequiredArgsConstructor
 @Slf4j
 public class AvgReducerAppl {
-	final AvgValueService avgReducer;
-	final StreamBridge streamBreadge;
-	@Value("${app.deviation.bindingName:avgValue-out-0}")
-	String avgValueBindingName;
+	final AvgValueService service;
+	final StreamBridge streamBridge;
+	@Value("${app.avg.binding.name}")
+	String bindingName;
 	public static void main(String[] args) {
 		SpringApplication.run(AvgReducerAppl.class, args);
+
 	}
-	
 	@Bean
-	public Consumer<ProbeData> consumerProbeData() {
-		return this::consumeMethod;
+	Consumer<ProbeData> probeConsumerAvg() {
+		return this::processProbeData;
 	}
-	
-	void consumeMethod(ProbeData probeData) {
-		log.trace("received probe: {}", probeData);
-		Long avgValue = avgReducer.getAvgValue(probeData);
+	void processProbeData(ProbeData probe) {
+		log.trace("{}", probe);
+		long sensorId = probe.sensorId();
+		Long avgValue = service.getAvgValue(probe);
 		if (avgValue != null) {
-			log.trace("average value: {}", avgValue);
-			ProbeData avgData = new ProbeData(probeData.sensorId(), avgValue, System.currentTimeMillis());
-			streamBreadge.send(avgValueBindingName, avgData);
-			log.trace("average data {} sent to {}", avgData, avgValueBindingName);
+			log.debug("for sensor {} avg value is {}", sensorId, avgValue);
+			streamBridge.send(bindingName, new ProbeData(sensorId, avgValue,System.currentTimeMillis()));
+		} else {
+			log.trace("for sensor {} no avg value yet", sensorId);
 		}
+		
 		
 	}
 	
-
 }

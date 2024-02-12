@@ -1,4 +1,4 @@
-package telran.probes;
+	package telran.probes;
 
 import java.util.Arrays;
 import java.util.function.Consumer;

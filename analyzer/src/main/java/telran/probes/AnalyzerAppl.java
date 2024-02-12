@@ -1,4 +1,4 @@
-package telran.probes;
+	package telran.probes;
 
 import java.util.function.Consumer;
 
@@ -19,7 +19,7 @@ import telran.probes.service.SensorRangeProviderService;
 public class AnalyzerAppl {
 final SensorRangeProviderService providerService;
 final StreamBridge streamBridge;
-@Value("${app.deviation.binding.name:deviation-out-0}")
+@Value("${app.deviation.binding.name}")
 String deviationBindingName;
 	public static void main(String[] args) {
 		SpringApplication.run(AnalyzerAppl.class, args);
