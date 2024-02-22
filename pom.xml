@@ -105,5 +105,6 @@
 		<module>email-data-provider</module>
 		<module>admin-console</module>
 		<module>config-server</module>
+		<module>account-provider</module>
 	</modules>
 </project>
