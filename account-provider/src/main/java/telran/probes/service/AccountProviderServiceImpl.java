@@ -8,13 +8,11 @@ import telran.exceptions.NotFoundException;
 import telran.probes.repo.AccountRepo;
 import telran.security.accounting.dto.AccountDto;
 import telran.security.accounting.model.Account;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class AccountProviderServiceImpl implements AccountProviderService {
 	final AccountRepo accountRepo;
-
 	@Override
 	public AccountDto getAccount(String email) {
 		Account account = accountRepo.findById(email)
