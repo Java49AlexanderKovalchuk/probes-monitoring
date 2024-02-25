@@ -6,4 +6,11 @@
     <version>0.0.1</version>
   </parent>
   <artifactId>gateway</artifactId>
+  <dependencies>
+	  <dependency>
+		  <groupId>org.springframework.cloud</groupId>
+		  <artifactId>spring-cloud-gateway-mvc</artifactId>
+		  <version>4.1.0</version>
+	  </dependency>
+  </dependencies>
 </project>

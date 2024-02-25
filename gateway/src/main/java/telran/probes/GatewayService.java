@@ -1,5 +1,7 @@
 package telran.probes;
 
-public interface GatewayService {
+import org.springframework.http.ResponseEntity;
 
+public interface GatewayService {
+	ResponseEntity<byte[]> proxyRouting(ProxyExchange<byte[]> proxyExchange, HttpServletRequest request){
 }
