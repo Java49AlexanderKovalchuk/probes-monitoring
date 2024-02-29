@@ -20,4 +20,12 @@ public class GatewayController {
 	ResponseEntity<byte[]> putProxy(ProxyExchange<byte[]> exchange, HttpServletRequest request) {
 		return gatewayService.proxyRouting(exchange, request, "PUT");
 	}
+	@PostMapping("/**")
+	ResponseEntity<byte[]> postProxy(ProxyExchange<byte[]> exchange, HttpServletRequest request) {
+		return gatewayService.proxyRouting(exchange, request, "POST");
+	}
+	@DeleteMapping("/**")
+	ResponseEntity<byte[]> deleteProxy(ProxyExchange<byte[]> exchange, HttpServletRequest request) {
+		return gatewayService.proxyRouting(exchange, request, "DELETE");
+	}
 }

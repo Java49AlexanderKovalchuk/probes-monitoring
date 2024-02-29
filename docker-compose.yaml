@@ -23,7 +23,7 @@ services:
           cpus: '0.3'
           memory: 200M 
     ports:
-      - 8080     
+      - 8080:8080     
   analyzer:
     build:
       analyzer #path with Dockerfile for analyzer
