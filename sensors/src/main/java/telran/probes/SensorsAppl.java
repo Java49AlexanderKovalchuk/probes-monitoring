@@ -43,6 +43,7 @@ public class SensorsAppl {
 		ProbeData probeData = sensorService.getRandomProbeData();
 		log.debug("probe data: {} has been sent to {}", probeData, bindingName);
 		return probeData;
+	
 	}
 
 } 
