@@ -12,6 +12,10 @@
     <groupId>org.springframework</groupId>
     <artifactId>spring-web</artifactId>
 </dependency>
-
+<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-sns</artifactId>
+			<version>1.12.671</version>
+		</dependency>
   </dependencies>
 </project>
