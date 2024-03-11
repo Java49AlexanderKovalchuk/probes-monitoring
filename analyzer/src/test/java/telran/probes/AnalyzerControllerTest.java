@@ -6,7 +6,10 @@ import static org.mockito.Mockito.*;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.stream.binder.test.InputDestination;
@@ -16,6 +19,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
 
+import com.amazonaws.services.sns.AmazonSNS;
+import com.amazonaws.services.sns.model.PublishResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import telran.probes.dto.ProbeData;
@@ -41,33 +46,67 @@ class AnalyzerControllerTest {
 	
 	static final ProbeData probeData = new ProbeData(SENSOR_ID, VALUE, 0);
 	ObjectMapper mapper = new ObjectMapper();
+	@MockBean
+	AmazonSNS snsClient;
 	@Autowired
 InputDestination producer;
-	@Autowired
-	OutputDestination consumer;
-	String bindingNameProducer="deviation-out-0";
+	
+	
 	String bindingNameConsumer="consumerProbeData-in-0";
+	
+	@Value("${app.deviation.notification.topic.arn}")
+	String awsTopic;
 	@MockBean
 	Consumer<String> configChangeConsumer;
 	@MockBean
 	SensorRangeProviderService providerService;
+	boolean flSnsSending;
+	String arn;
+	String message;
+	String subject;
 	@Test
 	void noDeviationTest() {
 		when(providerService.getSensorRange(SENSOR_ID))
 		.thenReturn(SENSOR_RANGE_NO_DEVIATION);
+		when(snsClient.publish(anyString(), anyString(), anyString()))
+		.then(new Answer<PublishResult>() {
+
+			@Override
+			public PublishResult answer(InvocationOnMock invocation) throws Throwable {
+				fail("no publishing must be");
+				return null;
+			}
+		});
 		producer.send(new GenericMessage<ProbeData>(probeData), bindingNameConsumer);
-		Message<byte[]> message = consumer.receive(10, bindingNameProducer);
-		assertNull(message);
+		
 	}
 	@Test
 	void minDeviationTest() throws Exception {
+		flSnsSending = false;
 		when(providerService.getSensorRange(SENSOR_ID))
 		.thenReturn(SENSOR_RANGE_MIN_DEVIATION);
+		when(snsClient.publish(anyString(), anyString(), anyString()))
+		.then(new Answer<PublishResult>() {
+
+			@Override
+			public PublishResult answer(InvocationOnMock invocation) throws Throwable {
+				arn = invocation.getArgument(0);
+				 message = invocation.getArgument(1);
+				 subject = invocation.getArgument(2);
+				
+				flSnsSending=true;
+				return new PublishResult();
+			}
+		});
 		producer.send(new GenericMessage<ProbeData>(probeData), bindingNameConsumer);
-		Message<byte[]> message = consumer.receive(10, bindingNameProducer);
-		assertNotNull(message);
-		ProbeDataDeviation actualDeviation = mapper.readValue(message.getPayload(), ProbeDataDeviation.class);
-		assertEquals(DATA_MIN_DEVIATION, actualDeviation);
+		assertTrue(flSnsSending);
+		assertEquals(awsTopic, arn);
+		assertTrue(message.contains("" + SENSOR_ID));
+		assertTrue(message.contains("" + VALUE));
+		assertTrue(message.contains("" + (VALUE - MIN_VALUE_DEVIATION)));
+		assertTrue(subject.contains("" + SENSOR_ID));
+		
+		
 		
 	}
 
